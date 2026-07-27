@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data & models (too large for git)
+costmap/data/*
+!costmap/data/.gitkeep
+costmap/models/*
+!costmap/models/.gitkeep
+*.pt
+*.pth
+*.onnx
+*.zip
+
+# ROS2
+build/
+install/
+log/
+
+# OS/editor
+.DS_Store
+.vscode/
+*.swp
