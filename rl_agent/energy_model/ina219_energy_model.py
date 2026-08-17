@@ -1,41 +1,65 @@
 class INA219EnergyModel:
     """
-    Simulated INA219 Voltage/Current Sensor Model for Energy-Aware Navigation.
-    Formula:
-    P = V * I (Watts)
-    Energy = P * dt (Joules)
-    """
-    def __init__(self, voltage_nom=12.0):
-        # Battery Nominal Voltage (12.0 V for 3S LiPo)
-        self.voltage = voltage_nom
-        
-        # Current Profiles in Amperes (A)
-        self.I_idle = 0.2       # Baseline electronics / Jetson idle current
-        self.I_move_flat = 1.0  # Normal movement current
-        self.I_move_rough = 2.5 # High friction / rough terrain movement current
+    Simulated INA219-based energy model.
 
-    def get_energy_consumption(self, action_type="flat", step_duration_sec=1.0):
+    Power:
+        P = V * I
+
+    Energy:
+        E = P * dt
+
+    Energy is returned in Joules.
+    """
+
+    def __init__(self, voltage_nom=12.0):
+
+        # Nominal battery voltage
+        self.voltage = voltage_nom
+
+        # Current profiles (Amperes)
+        self.I_idle = 0.2
+        self.I_move_flat = 1.0
+        self.I_move_rough = 2.5
+
+    def get_energy_consumption(
+        self,
+        action_type="flat",
+        step_duration_sec=1.0
+    ):
         """
-        Calculates energy spent in Joules for a given step.
-        
+        Calculate energy consumed during one action.
+
         Parameters:
-            action_type (str): "idle", "flat", or "rough"
-            step_duration_sec (float): Time taken for one step in seconds (default = 1.0s)
-            
+            action_type:
+                "idle", "flat", or "rough"
+
+            step_duration_sec:
+                Duration of the movement in seconds.
+
         Returns:
-            energy_joules (float): Total energy consumed in Joules.
+            Energy consumption in Joules.
         """
+
         if action_type == "idle":
             current = self.I_idle
+
         elif action_type == "rough":
             current = self.I_move_rough
-        else:
+
+        elif action_type == "flat":
             current = self.I_move_flat
 
-        # 1. Total Power P = V * I
+        else:
+            raise ValueError(
+                f"Unknown action_type: {action_type}"
+            )
+
+        # Power = Voltage × Current
         power_watts = self.voltage * current
-        
-        # 2. Energy E = P * dt (Joules)
-        energy_joules = power_watts * step_duration_sec
-        
+
+        # Energy = Power × Time
+        energy_joules = (
+            power_watts * step_duration_sec
+        )
+
         return energy_joules
